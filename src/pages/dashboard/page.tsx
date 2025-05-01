@@ -123,8 +123,8 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-bold tracking-tight">Panel Principal</h1>
 
             {/* Selector de rol (solo para demostración) */}
-            <div className="mb-6">
-              <p className="mb-2 text-lg font-medium">Cambiar rol (demo):</p>
+            <div className="mb-6">              
+              {/** <p className="mb-2 text-lg font-medium">Cambiar rol (demo):</p>*/}
               <div className="flex gap-2">
                 <Button variant={role === "estudiante" ? "default" : "outline"} onClick={() => setRole("estudiante")}>
                   Estudiante

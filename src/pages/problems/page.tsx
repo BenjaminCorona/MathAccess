@@ -28,6 +28,7 @@ export default function ProblemsPage() {
         <div className="mx-auto max-w-7xl space-y-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h1 className="text-3xl font-bold tracking-tight">Problemas Matemáticos</h1>
+            {/** 
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon" aria-label="Filtrar problemas">
                 <Filter className="h-5 w-5" />
@@ -37,9 +38,12 @@ export default function ProblemsPage() {
                 <Input type="search" placeholder="Buscar problema..." className="pl-8 w-full md:w-[250px]" />
               </div>
             </div>
+            */}
           </div>
 
+
           <div className="flex flex-wrap gap-4">
+          {/** 
             <Select defaultValue="todos">
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Dificultad" />
@@ -63,7 +67,9 @@ export default function ProblemsPage() {
                 <SelectItem value="vencido">Vencido</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          */}
+            </div>
+          
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {/* Problema 1 */}
@@ -239,6 +245,7 @@ export default function ProblemsPage() {
             </Card>
           </div>
 
+          {/** 
           <div className="flex justify-center mt-8">
             <Button variant="outline" className="mx-1">
               1
@@ -256,6 +263,7 @@ export default function ProblemsPage() {
               5
             </Button>
           </div>
+          */}
         </div>
       </main>
     </div>
