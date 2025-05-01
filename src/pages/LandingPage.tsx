@@ -1,5 +1,6 @@
 import { ArrowRight, BookOpen, Users, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import banner from "../assets/img/banner.jpg"
 
 export default function LandingPage() {
     return (
@@ -66,7 +67,7 @@ export default function LandingPage() {
                             </div>
                             <div className="relative h-[350px] w-full rounded-xl overflow-hidden">
                                 <img
-                                    src="/placeholder.svg?height=700&width=700"
+                                    src={banner}
                                     alt="Estudiantes aprendiendo matemáticas"
                                     className="object-cover"
                                 />

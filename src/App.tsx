@@ -12,6 +12,8 @@ import MetricsPage from "./pages/metrics/page";
 import ProblemsPage from "./pages/problems/page";
 import ProgressPage from "./pages/progress/page";
 import ProblemPage from "./pages/problems/[id]/page"
+import ProfilePage from "./pages/profile/page";
+
 function App() {
     return (
         <>
@@ -34,6 +36,7 @@ function App() {
                     id: ""
                 }} />} />
                 <Route path="/progress" element={<ProgressPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
 
             </Routes>
         </>
