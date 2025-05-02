@@ -44,7 +44,7 @@ export default function DashboardPage() {
     const [totalStudents, setTotalStudents] = useState(0);
     const [totalTeachers, setTotalTeachers] = useState(0);
     const [totalAdmins, setTotalAdmins] = useState(0);
-
+    const [totalContent, setTotalContent] = useState(0);
 
     //useEffect para verificar si el usuario ya está autenticado
     useEffect(() => {
@@ -171,6 +171,58 @@ export default function DashboardPage() {
     };
 
     //función para obtener los contenidos de http://localhost/math_api/contenidos
+    const fetchContents = async () => {
+        try {
+            const response = await fetch(
+                "http://localhost/math_api/contenidos",
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "auth_token"
+                        )}`,
+                    },
+                }
+            );
+            const dataContent = await response.json();
+            console.log("Contenidos:", dataContent);
+
+            if (dataContent && typeof dataContent === "object") {
+                // If data is an object with a specific structure (like { usuarios: [...] })
+                // Try to find the array in a common property
+                const usersArray =
+                    dataContent.content ||
+                    dataContent.data ||
+                    dataContent.results ||
+                    [];
+                if (Array.isArray(usersArray)) {
+                    console.log(
+                        "Número total de contenidos:",
+                        usersArray.length
+                    );
+                    setTotalContent(usersArray.length);
+                } else {
+                    console.log(
+                        "No se pudo encontrar un arreglo de usuarios en la respuesta:",
+                        dataContent
+                    );
+                }
+            } else {
+                console.log(
+                    "La respuesta no es un arreglo ni un objeto:",
+                    dataContent
+                );
+            }
+        } catch (error) {
+            console.error("Error al obtener contenidos:", error);
+        }
+    };
+
+    //Llamar a la función para obtener los contenidos al cargar el componente
+    useEffect(() => {
+        fetchContents();
+    }, [totalContent]);
 
     // Llamar a la función para obtener los usuarios al cargar el componente
     useEffect(() => {
@@ -677,7 +729,7 @@ export default function DashboardPage() {
                                             <div className="grid gap-6 md:grid-cols-3">
                                                 <div className="flex flex-col items-center justify-center rounded-lg border p-4">
                                                     <span className="text-3xl font-bold">
-                                                        42
+                                                        {totalContent}
                                                     </span>
                                                     <span className="text-muted-foreground">
                                                         Contenidos
@@ -693,7 +745,7 @@ export default function DashboardPage() {
                                                 </div>
                                                 <div className="flex flex-col items-center justify-center rounded-lg border p-4">
                                                     <span className="text-3xl font-bold">
-                                                        12
+                                                        {totalContent}
                                                     </span>
                                                     <span className="text-muted-foreground">
                                                         Cursos

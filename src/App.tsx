@@ -24,9 +24,7 @@ function App() {
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/auth?register=true" element={<AuthPage />} />
                 <Route path="/content" element={<ContentsPage />} />
-                <Route path="/content/:id" element={<ContentPage params={{
-                    id: ""
-                }} />} />
+                <Route path="/content/:id" element={<ContentPage />} />
                 <Route path="/create-content" element={<CreateContentPage />} />
                 <Route path="/create-problem" element={<CreateProblemPage />} />        
                 <Route path="/dashboard" element={<DashboardPage />} />
