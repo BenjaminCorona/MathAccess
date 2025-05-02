@@ -4,20 +4,19 @@ import type React from "react"
 
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { BookOpen, ArrowLeft, Upload, X } from "lucide-react"
+import { BookOpen, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+
 // Importamos SweetAlert2
 import Swal from "sweetalert2"
 
 export default function CreateContentPage() {
   const navigate = useNavigate()
-  const [files, setFiles] = useState<File[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   // Estados para los campos del formulario (nombres cambiados a español)
@@ -25,17 +24,6 @@ export default function CreateContentPage() {
   const [descripcion, setDescripcion] = useState("")
   const [tipo, setTipo] = useState("")
   const [nivel, setNivel] = useState("")
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files)
-      setFiles((prev) => [...prev, ...newFiles])
-    }
-  }
-
-  const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index))
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -101,7 +89,6 @@ export default function CreateContentPage() {
         setDescripcion("")
         setTipo("")
         setNivel("")
-        setFiles([])
       }
       
     } catch (error) {
