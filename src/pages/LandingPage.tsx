@@ -1,8 +1,22 @@
 import { ArrowRight, BookOpen, Users, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import banner from "../assets/img/banner.jpg"
+import banner from "../assets/img/banner.jpg";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function LandingPage() {
+    const navigate = useNavigate();
+
+    // useEffect para verificar si el usuario ya está autenticado
+    useEffect(() => {
+        // Verificar si el usuario ya está autenticado
+        const token = localStorage.getItem("auth_token");
+        if (token) {
+            // Si hay un token, redirigir al dashboard
+            navigate("/dashboard");
+        }
+    }, []);
+
     return (
         <div className="flex flex-col min-h-screen">
             <header className="border-b">
