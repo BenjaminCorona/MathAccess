@@ -41,7 +41,12 @@ export default function DashboardPage() {
     const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
     const [role, setRole] = useState("estudiante"); // Simulación de rol, en producción vendría de autenticación
     const [userData, setUserData] = useState<UserData | null>(null);
+    const [totalStudents, setTotalStudents] = useState(0);
+    const [totalTeachers, setTotalTeachers] = useState(0);
+    const [totalAdmins, setTotalAdmins] = useState(0);
 
+
+    //useEffect para verificar si el usuario ya está autenticado
     useEffect(() => {
         const token = localStorage.getItem("auth_token");
 
@@ -68,10 +73,110 @@ export default function DashboardPage() {
         }
     }, [navigate]);
 
-    // Add a separate useEffect to log userData when it changes
+    // useEffect para verificar si el rol del usuario ha cambiado
     useEffect(() => {
         console.log("User data updated:", userData?.rol);
     }, [userData]);
+
+    // función para obtener los usuarios de http://localhost/math_api/usuarios
+    const fetchUsers = async () => {
+        try {
+            const response = await fetch("http://localhost/math_api/usuarios", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem(
+                        "auth_token"
+                    )}`,
+                },
+            });
+            const data = await response.json();
+
+            console.log("Usuarios:", data);
+
+            // Check if data is an array before trying to access length
+            if (Array.isArray(data)) {
+                console.log("Número total de usuarios:", data.length);
+
+                //logs para mostrar cuantos usuarios hay, y a parte cuantos de esos son usuarios cuantos maestros y cuantos admin
+                const totalUsers = data.length;
+
+                setTotalStudents(
+                    data.filter((user: UserData) => user.rol === "usuario")
+                        .length
+                );
+
+                setTotalTeachers(
+                    data.filter((user: UserData) => user.rol === "maestro")
+                        .length
+                );
+
+                setTotalAdmins(
+                    data.filter((user: UserData) => user.rol === "admin").length
+                );
+
+                console.log("Total de usuarios:", totalUsers);
+                console.log("Total de estudiantes:", totalStudents);
+                console.log("Total de maestros:", totalTeachers);
+                console.log("Total de administradores:", totalAdmins);
+            } else if (data && typeof data === "object") {
+                // If data is an object with a specific structure (like { usuarios: [...] })
+                // Try to find the array in a common property
+                const usersArray =
+                    data.usuarios || data.data || data.results || [];
+                if (Array.isArray(usersArray)) {
+                    console.log("Número total de usuarios:", usersArray.length);
+
+                    const totalUsers = usersArray.length;
+
+                    setTotalStudents(
+                        usersArray.filter(
+                            (user: UserData) => user.rol === "usuario"
+                        ).length
+                    );
+
+                    setTotalTeachers(
+                        usersArray.filter(
+                            (user: UserData) => user.rol === "maestro"
+                        ).length
+                    );
+
+                    setTotalAdmins(
+                        usersArray.filter(
+                            (user: UserData) => user.rol === "admin"
+                        ).length
+                    );
+
+                    console.log("Total de usuarios:", totalUsers);
+
+                    console.log("Total de estudiantes:", totalStudents);
+                    console.log("Total de maestros:", totalTeachers);
+                    console.log("Total de administradores:", totalAdmins);
+                } else {
+                    console.log(
+                        "No se pudo encontrar un arreglo de usuarios en la respuesta:",
+                        data
+                    );
+                }
+            } else {
+                console.log(
+                    "La respuesta no es un arreglo ni un objeto:",
+                    data
+                );
+            }
+            // Aquí puedes actualizar el estado con los datos obtenidos
+        } catch (error) {
+            console.error("Error al obtener usuarios:", error);
+        }
+    };
+
+    //función para obtener los contenidos de http://localhost/math_api/contenidos
+
+    // Llamar a la función para obtener los usuarios al cargar el componente
+    useEffect(() => {
+        fetchUsers();
+    }, [totalStudents, totalTeachers, totalAdmins]);
+    // Función para cambiar el rol (solo para demostración)
 
     // Función para manejar el cierre de sesión
     const handleLogout = () => {
@@ -524,7 +629,7 @@ export default function DashboardPage() {
                                             <div className="grid gap-6 md:grid-cols-3">
                                                 <div className="flex flex-col items-center justify-center rounded-lg border p-4">
                                                     <span className="text-3xl font-bold">
-                                                        125
+                                                        {totalStudents}
                                                     </span>
                                                     <span className="text-muted-foreground">
                                                         Estudiantes
@@ -532,7 +637,7 @@ export default function DashboardPage() {
                                                 </div>
                                                 <div className="flex flex-col items-center justify-center rounded-lg border p-4">
                                                     <span className="text-3xl font-bold">
-                                                        18
+                                                        {totalTeachers}
                                                     </span>
                                                     <span className="text-muted-foreground">
                                                         Maestros
@@ -540,7 +645,7 @@ export default function DashboardPage() {
                                                 </div>
                                                 <div className="flex flex-col items-center justify-center rounded-lg border p-4">
                                                     <span className="text-3xl font-bold">
-                                                        5
+                                                        {totalAdmins}
                                                     </span>
                                                     <span className="text-muted-foreground">
                                                         Administradores
