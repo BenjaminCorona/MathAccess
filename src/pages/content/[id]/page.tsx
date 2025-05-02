@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
     BookOpen,
@@ -21,7 +21,12 @@ export default function ContentPage() {
 
     const [fontSize, setFontSize] = useState(16);
     const [highContrast, setHighContrast] = useState(false);
-    const [contentResult, setContentResult] = useState({});
+    const [contentResult, setContentResult] = useState();
+    const [titleResult, setTitleResult] = useState();
+    const [typeResult, setTypeResult] = useState();
+    const [levelResult, setLevelResult] = useState();
+    const [createdAtResult, setCreatedAtResult] = useState();
+    const [isSpeaking, setIsSpeaking] = useState(false);
 
     // Log the ID parameter when component mounts
     useEffect(() => {
@@ -100,18 +105,60 @@ export default function ContentPage() {
             .then((res) => res.json())
             .then((data) => {
                 console.log("Respuesta cruda:", data);
-                // si la API devuelve { data: [...] } o directamente [...]
-                const contenido = Array.isArray(data)
-                    ? data
-                    : Array.isArray(data.data)
-                    ? data.data
-                    : [];
-                console.log("Arreglo final contenido:", data.data.descripcion);
+
                 setContentResult(data.data.descripcion);
-                console.log("Contenido:", contenido);
+                setTitleResult(data.data.titulo);
+                setTypeResult(data.data.tipo);
+                setLevelResult(data.data.nivel);
+                setCreatedAtResult(data.data.created_at);
             })
             .catch((err) => console.error("Error fetching contenido:", err));
     }, [contentResult]);
+
+    const contentRef = useRef<HTMLDivElement>(null);
+    
+    // --- Función para leer en voz alta o pausar ---
+    const readAloud = () => {
+        // Si ya está hablando, pausar
+        if (isSpeaking) {
+            speechSynthesis.pause();
+            setIsSpeaking(false);
+            return;
+        }
+        
+        // Si hay una síntesis pausada, reanudarla
+        if (speechSynthesis.paused) {
+            speechSynthesis.resume();
+            setIsSpeaking(true);
+            return;
+        }
+        
+        // Si no hay nada, empezar nueva lectura
+        if (!contentRef.current) return;
+        
+        // extraer solo texto plano, sin HTML
+        const text = contentRef.current.innerText;
+        if (!text) return;
+
+        // si ya está leyendo algo diferente, cancelamos antes
+        if (speechSynthesis.speaking) {
+            speechSynthesis.cancel();
+        }
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "es-ES";
+        utterance.rate = 1;
+        utterance.pitch = 1;
+        
+        // Cambiar estado cuando termine de hablar
+        utterance.onend = () => {
+            setIsSpeaking(false);
+        };
+        
+        // Iniciar lectura y actualizar estado
+        speechSynthesis.speak(utterance);
+        setIsSpeaking(true);
+    };
 
     return (
         <div className="flex min-h-screen flex-col">
@@ -136,25 +183,23 @@ export default function ContentPage() {
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight">
-                                {content.title}
+                                {titleResult}
                             </h1>
                             <p className="text-muted-foreground">
-                                {content.description}
+                                Curso de Matemáticas
                             </p>
                         </div>
                         <Badge className="self-start sm:self-auto">
-                            {content.type}
+                            {typeResult}
                         </Badge>
                     </div>
 
                     <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                        <span>Nivel: {content.level}</span>
+                        <span>Nivel: {levelResult}</span>
                         <span className="mx-2">•</span>
-                        <span>Duración: {content.duration}</span>
+                        <span>Duración: {"45 min"}</span>
                         <span className="mx-2">•</span>
-                        <span>Autor: {content.author}</span>
-                        <span className="mx-2">•</span>
-                        <span>Fecha: {content.date}</span>
+                        <span>Fecha: {createdAtResult}</span>
                     </div>
 
                     <div className="flex flex-wrap gap-2">
@@ -186,12 +231,13 @@ export default function ContentPage() {
                             Alto contraste
                         </Button>
                         <Button
-                            variant="outline"
+                            onClick={readAloud}
+                            variant={isSpeaking ? "default" : "outline"}
                             size="sm"
-                            aria-label="Leer en voz alta"
+                            aria-label={isSpeaking ? "Pausar lectura" : "Leer en voz alta"}
                         >
                             <Volume2 className="h-4 w-4 mr-1" />
-                            Leer en voz alta
+                            {isSpeaking ? "Pausar lectura" : "Leer en voz alta"}
                         </Button>
                     </div>
 
@@ -213,9 +259,10 @@ export default function ContentPage() {
                                     style={{ fontSize: `${fontSize}px` }}
                                 >
                                     <div
+                                        ref={contentRef}
                                         className="content-area space-y-4"
                                         dangerouslySetInnerHTML={{
-                                            __html: contentResult,
+                                            __html: contentResult || "",
                                         }}
                                     ></div>
                                 </CardContent>

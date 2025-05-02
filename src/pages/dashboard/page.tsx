@@ -26,6 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { mathProblems } from "../problems/problems";
 
 export default function DashboardPage() {
     const navigate = useNavigate();
@@ -45,6 +46,7 @@ export default function DashboardPage() {
     const [totalTeachers, setTotalTeachers] = useState(0);
     const [totalAdmins, setTotalAdmins] = useState(0);
     const [totalContent, setTotalContent] = useState(0);
+    const totalProblems = mathProblems.length;
 
     //useEffect para verificar si el usuario ya está autenticado
     useEffect(() => {
@@ -354,6 +356,7 @@ export default function DashboardPage() {
                                     <FilePlus className="h-5 w-5" />
                                     <span>Crear Contenido</span>
                                 </Link>
+                                {/** 
                                 <Link
                                     to="/create-problem"
                                     className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-accent transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-ring"
@@ -361,6 +364,7 @@ export default function DashboardPage() {
                                     <FileEdit className="h-5 w-5" />
                                     <span>Crear Problema</span>
                                 </Link>
+                                */}
                             </>
                         )}
 
@@ -737,7 +741,7 @@ export default function DashboardPage() {
                                                 </div>
                                                 <div className="flex flex-col items-center justify-center rounded-lg border p-4">
                                                     <span className="text-3xl font-bold">
-                                                        87
+                                                        {totalProblems}
                                                     </span>
                                                     <span className="text-muted-foreground">
                                                         Problemas

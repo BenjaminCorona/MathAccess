@@ -11,7 +11,7 @@ import DashboardPage from "./pages/dashboard/page";
 import MetricsPage from "./pages/metrics/page";
 import ProblemsPage from "./pages/problems/page";
 import ProgressPage from "./pages/progress/page";
-import ProblemPage from "./pages/problems/[id]/page"
+import ProblemPage from "./pages/problems/[id]/page";
 import ProfilePage from "./pages/profile/page";
 
 function App() {
@@ -26,16 +26,13 @@ function App() {
                 <Route path="/content" element={<ContentsPage />} />
                 <Route path="/content/:id" element={<ContentPage />} />
                 <Route path="/create-content" element={<CreateContentPage />} />
-                <Route path="/create-problem" element={<CreateProblemPage />} />        
+                <Route path="/create-problem" element={<CreateProblemPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/metrics" element={<MetricsPage />} />
                 <Route path="/problems" element={<ProblemsPage />} />
-                <Route path="/problems/:id" element={<ProblemPage params={{
-                    id: ""
-                }} />} />
+                <Route path="/problems/:id" element={<ProblemPage />} />
                 <Route path="/progress" element={<ProgressPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
-
             </Routes>
         </>
     );
