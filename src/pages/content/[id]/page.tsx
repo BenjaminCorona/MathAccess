@@ -1,28 +1,49 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Link } from "react-router-dom"
-import { BookOpen, ArrowLeft, Volume2, TextIcon, ZoomIn, ZoomOut } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useState, useEffect, useRef } from "react";
+import { Link, useParams } from "react-router-dom";
+import {
+    BookOpen,
+    ArrowLeft,
+    Volume2,
+    TextIcon,
+    ZoomIn,
+    ZoomOut,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export default function ContentPage({ params }: { params: { id: string } }) {
-  const [fontSize, setFontSize] = useState(16)
-  const [highContrast, setHighContrast] = useState(false)
+export default function ContentPage() {
+    const params = useParams();
+    const contentId = params.id;
 
-  // Simulación de datos del contenido
-  const content = {
-    id: params.id,
-    title: "Cálculo Diferencial",
-    description: "Fundamentos de límites y derivadas",
-    type: "Teoría",
-    level: "Intermedio",
-    duration: "45 min",
-    author: "Dr. Carlos Rodríguez",
-    date: "10/04/2025",
-    content: `
+    const [fontSize, setFontSize] = useState(16);
+    const [highContrast, setHighContrast] = useState(false);
+    const [contentResult, setContentResult] = useState();
+    const [titleResult, setTitleResult] = useState();
+    const [typeResult, setTypeResult] = useState();
+    const [levelResult, setLevelResult] = useState();
+    const [createdAtResult, setCreatedAtResult] = useState();
+    const [isSpeaking, setIsSpeaking] = useState(false);
+
+    // Log the ID parameter when component mounts
+    useEffect(() => {
+        console.log("Content ID from URL parameter:", contentId);
+    }, [contentId]);
+
+    // Simulación de datos del contenido
+    const content = {
+        id: contentId,
+        title: "Cálculo Diferencial",
+        description: "Fundamentos de límites y derivadas",
+        type: "Teoría",
+        level: "Intermedio",
+        duration: "45 min",
+        author: "Dr. Carlos Rodríguez",
+        date: "10/04/2025",
+        content: `
       <h2>Introducción al Cálculo Diferencial</h2>
       <p>El cálculo diferencial es una rama de las matemáticas que se ocupa del estudio de cómo cambian las funciones cuando sus entradas cambian. El concepto principal del cálculo diferencial es la derivada.</p>
       
@@ -59,135 +80,250 @@ export default function ContentPage({ params }: { params: { id: string } }) {
         <li>Aproximación de funciones</li>
       </ul>
     `,
-    resources: [
-      { name: "Presentación de Límites", type: "PDF", size: "2.4 MB" },
-      { name: "Ejercicios de Derivadas", type: "PDF", size: "1.8 MB" },
-      { name: "Video explicativo", type: "MP4", size: "45 MB" },
-    ],
-  }
+        resources: [
+            { name: "Presentación de Límites", type: "PDF", size: "2.4 MB" },
+            { name: "Ejercicios de Derivadas", type: "PDF", size: "1.8 MB" },
+            { name: "Video explicativo", type: "MP4", size: "45 MB" },
+        ],
+    };
 
-  const increaseFontSize = () => {
-    setFontSize((prev) => Math.min(prev + 2, 24))
-  }
+    const increaseFontSize = () => {
+        setFontSize((prev) => Math.min(prev + 2, 24));
+    };
 
-  const decreaseFontSize = () => {
-    setFontSize((prev) => Math.max(prev - 2, 12))
-  }
+    const decreaseFontSize = () => {
+        setFontSize((prev) => Math.max(prev - 2, 12));
+    };
 
-  const toggleContrast = () => {
-    setHighContrast((prev) => !prev)
-  }
+    const toggleContrast = () => {
+        setHighContrast((prev) => !prev);
+    };
 
-  return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-        <Link to="/content" className="flex items-center gap-2 font-bold">
-          <ArrowLeft className="h-5 w-5" />
-          <BookOpen className="h-6 w-6" />
-          <span className="text-xl">MathAccess</span>
-        </Link>
-        <div className="ml-auto flex items-center gap-4">
-          <Link to="/dashboard">
-            <Button variant="outline">Volver al Panel</Button>
-          </Link>
-        </div>
-      </header>
+    //obtener el contenido desde la API http://localhost/math_api/contenidos/(id)
+    useEffect(() => {
+        fetch(`http://localhost/math_api/contenidos/${contentId}`)
+            .then((res) => res.json())
+            .then((data) => {
+                console.log("Respuesta cruda:", data);
 
-      <main className="flex-1 p-4 md:p-6">
-        <div className="mx-auto max-w-4xl space-y-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">{content.title}</h1>
-              <p className="text-muted-foreground">{content.description}</p>
-            </div>
-            <Badge className="self-start sm:self-auto">{content.type}</Badge>
-          </div>
+                setContentResult(data.data.descripcion);
+                setTitleResult(data.data.titulo);
+                setTypeResult(data.data.tipo);
+                setLevelResult(data.data.nivel);
+                setCreatedAtResult(data.data.created_at);
+            })
+            .catch((err) => console.error("Error fetching contenido:", err));
+    }, [contentResult]);
 
-          <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-            <span>Nivel: {content.level}</span>
-            <span className="mx-2">•</span>
-            <span>Duración: {content.duration}</span>
-            <span className="mx-2">•</span>
-            <span>Autor: {content.author}</span>
-            <span className="mx-2">•</span>
-            <span>Fecha: {content.date}</span>
-          </div>
+    const contentRef = useRef<HTMLDivElement>(null);
+    
+    // --- Función para leer en voz alta o pausar ---
+    const readAloud = () => {
+        // Si ya está hablando, pausar
+        if (isSpeaking) {
+            speechSynthesis.pause();
+            setIsSpeaking(false);
+            return;
+        }
+        
+        // Si hay una síntesis pausada, reanudarla
+        if (speechSynthesis.paused) {
+            speechSynthesis.resume();
+            setIsSpeaking(true);
+            return;
+        }
+        
+        // Si no hay nada, empezar nueva lectura
+        if (!contentRef.current) return;
+        
+        // extraer solo texto plano, sin HTML
+        const text = contentRef.current.innerText;
+        if (!text) return;
 
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={decreaseFontSize} aria-label="Disminuir tamaño de texto">
-              <ZoomOut className="h-4 w-4 mr-1" />
-              A-
-            </Button>
-            <Button variant="outline" size="sm" onClick={increaseFontSize} aria-label="Aumentar tamaño de texto">
-              <ZoomIn className="h-4 w-4 mr-1" />
-              A+
-            </Button>
-            <Button
-              variant={highContrast ? "default" : "outline"}
-              size="sm"
-              onClick={toggleContrast}
-              aria-label="Alternar alto contraste"
-            >
-              <TextIcon className="h-4 w-4 mr-1" />
-              Alto contraste
-            </Button>
-            <Button variant="outline" size="sm" aria-label="Leer en voz alta">
-              <Volume2 className="h-4 w-4 mr-1" />
-              Leer en voz alta
-            </Button>
-          </div>
+        // si ya está leyendo algo diferente, cancelamos antes
+        if (speechSynthesis.speaking) {
+            speechSynthesis.cancel();
+        }
 
-          <Tabs defaultValue="contenido">
-            <TabsList className="grid w-full grid-cols-2 text-lg">
-              <TabsTrigger value="contenido">Contenido</TabsTrigger>
-              <TabsTrigger value="recursos">Recursos</TabsTrigger>
-            </TabsList>
-            <TabsContent value="contenido" className="mt-6">
-              <Card>
-                <CardContent
-                  className={`p-6 ${highContrast ? "bg-black text-white" : ""}`}
-                  style={{ fontSize: `${fontSize}px` }}
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "es-ES";
+        utterance.rate = 1;
+        utterance.pitch = 1;
+        
+        // Cambiar estado cuando termine de hablar
+        utterance.onend = () => {
+            setIsSpeaking(false);
+        };
+        
+        // Iniciar lectura y actualizar estado
+        speechSynthesis.speak(utterance);
+        setIsSpeaking(true);
+    };
+
+    return (
+        <div className="flex min-h-screen flex-col">
+            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+                <Link
+                    to="/content"
+                    className="flex items-center gap-2 font-bold"
                 >
-                  <div className="content-area space-y-4" dangerouslySetInnerHTML={{ __html: content.content }}></div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="recursos" className="mt-6">
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-bold mb-4">Recursos Disponibles</h2>
-                  <ul className="space-y-4">
-                    {content.resources.map((resource, index) => (
-                      <li key={index} className="flex items-center justify-between border-b pb-2">
-                        <div className="flex items-center">
-                          {resource.type === "PDF" && (
-                            <div className="bg-red-100 text-red-800 p-2 rounded mr-3">PDF</div>
-                          )}
-                          {resource.type === "MP4" && (
-                            <div className="bg-blue-100 text-blue-800 p-2 rounded mr-3">VIDEO</div>
-                          )}
-                          <span>{resource.name}</span>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm text-muted-foreground">{resource.size}</span>
-                          <Button variant="outline" size="sm">
-                            Descargar
-                          </Button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                    <ArrowLeft className="h-5 w-5" />
+                    <BookOpen className="h-6 w-6" />
+                    <span className="text-xl">MathAccess</span>
+                </Link>
+                <div className="ml-auto flex items-center gap-4">
+                    <Link to="/dashboard">
+                        <Button variant="outline">Volver al Panel</Button>
+                    </Link>
+                </div>
+            </header>
 
-          <div className="flex justify-between">
-            <Button variant="outline">Contenido Anterior</Button>
-            <Button>Siguiente Contenido</Button>
-          </div>
+            <main className="flex-1 p-4 md:p-6">
+                <div className="mx-auto max-w-4xl space-y-6">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h1 className="text-3xl font-bold tracking-tight">
+                                {titleResult}
+                            </h1>
+                            <p className="text-muted-foreground">
+                                Curso de Matemáticas
+                            </p>
+                        </div>
+                        <Badge className="self-start sm:self-auto">
+                            {typeResult}
+                        </Badge>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+                        <span>Nivel: {levelResult}</span>
+                        <span className="mx-2">•</span>
+                        <span>Duración: {"45 min"}</span>
+                        <span className="mx-2">•</span>
+                        <span>Fecha: {createdAtResult}</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={decreaseFontSize}
+                            aria-label="Disminuir tamaño de texto"
+                        >
+                            <ZoomOut className="h-4 w-4 mr-1" />
+                            A-
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={increaseFontSize}
+                            aria-label="Aumentar tamaño de texto"
+                        >
+                            <ZoomIn className="h-4 w-4 mr-1" />
+                            A+
+                        </Button>
+                        <Button
+                            variant={highContrast ? "default" : "outline"}
+                            size="sm"
+                            onClick={toggleContrast}
+                            aria-label="Alternar alto contraste"
+                        >
+                            <TextIcon className="h-4 w-4 mr-1" />
+                            Alto contraste
+                        </Button>
+                        <Button
+                            onClick={readAloud}
+                            variant={isSpeaking ? "default" : "outline"}
+                            size="sm"
+                            aria-label={isSpeaking ? "Pausar lectura" : "Leer en voz alta"}
+                        >
+                            <Volume2 className="h-4 w-4 mr-1" />
+                            {isSpeaking ? "Pausar lectura" : "Leer en voz alta"}
+                        </Button>
+                    </div>
+
+                    <Tabs defaultValue="contenido">
+                        <TabsList className="grid w-full grid-cols-2 text-lg">
+                            <TabsTrigger value="contenido">
+                                Contenido
+                            </TabsTrigger>
+                            <TabsTrigger value="recursos">Recursos</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="contenido" className="mt-6">
+                            <Card>
+                                <CardContent
+                                    className={`p-6 ${
+                                        highContrast
+                                            ? "bg-black text-white"
+                                            : ""
+                                    }`}
+                                    style={{ fontSize: `${fontSize}px` }}
+                                >
+                                    <div
+                                        ref={contentRef}
+                                        className="content-area space-y-4"
+                                        dangerouslySetInnerHTML={{
+                                            __html: contentResult || "",
+                                        }}
+                                    ></div>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                        <TabsContent value="recursos" className="mt-6">
+                            <Card>
+                                <CardContent className="p-6">
+                                    <h2 className="text-xl font-bold mb-4">
+                                        Recursos Disponibles
+                                    </h2>
+                                    <ul className="space-y-4">
+                                        {content.resources.map(
+                                            (resource, index) => (
+                                                <li
+                                                    key={index}
+                                                    className="flex items-center justify-between border-b pb-2"
+                                                >
+                                                    <div className="flex items-center">
+                                                        {resource.type ===
+                                                            "PDF" && (
+                                                            <div className="bg-red-100 text-red-800 p-2 rounded mr-3">
+                                                                PDF
+                                                            </div>
+                                                        )}
+                                                        {resource.type ===
+                                                            "MP4" && (
+                                                            <div className="bg-blue-100 text-blue-800 p-2 rounded mr-3">
+                                                                VIDEO
+                                                            </div>
+                                                        )}
+                                                        <span>
+                                                            {resource.name}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-4">
+                                                        <span className="text-sm text-muted-foreground">
+                                                            {resource.size}
+                                                        </span>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                        >
+                                                            Descargar
+                                                        </Button>
+                                                    </div>
+                                                </li>
+                                            )
+                                        )}
+                                    </ul>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                    </Tabs>
+
+                    <div className="flex justify-between">
+                        <Button variant="outline">Contenido Anterior</Button>
+                        <Button>Siguiente Contenido</Button>
+                    </div>
+                </div>
+            </main>
         </div>
-      </main>
-    </div>
-  )
+    );
 }

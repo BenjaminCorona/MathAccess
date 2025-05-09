@@ -1,7 +1,22 @@
 import { ArrowRight, BookOpen, Users, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import banner from "../assets/img/banner.jpg";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function LandingPage() {
+    const navigate = useNavigate();
+
+    // useEffect para verificar si el usuario ya está autenticado
+    useEffect(() => {
+        // Verificar si el usuario ya está autenticado
+        const token = localStorage.getItem("auth_token");
+        if (token) {
+            // Si hay un token, redirigir al dashboard
+            navigate("/dashboard");
+        }
+    }, []);
+
     return (
         <div className="flex flex-col min-h-screen">
             <header className="border-b">
@@ -66,7 +81,7 @@ export default function LandingPage() {
                             </div>
                             <div className="relative h-[350px] w-full rounded-xl overflow-hidden">
                                 <img
-                                    src="/placeholder.svg?height=700&width=700"
+                                    src={banner}
                                     alt="Estudiantes aprendiendo matemáticas"
                                     className="object-cover"
                                 />
