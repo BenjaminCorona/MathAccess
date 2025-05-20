@@ -1,8 +1,8 @@
 import type React from "react";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { BookOpen, ArrowLeft, Send, Mic, PenTool } from "lucide-react";
+import { BookOpen, ArrowLeft, Send, Mic, PenTool, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -16,6 +16,13 @@ import { Badge } from "@/components/ui/badge";
 import { mathProblems } from "../problems";
 import Swal from "sweetalert2";
 
+declare global {
+    interface Window {
+        SpeechRecognition: any;
+        webkitSpeechRecognition: any;
+    }
+}
+
 export default function ProblemPage() {
     const params = useParams();
     const { id } = params;
@@ -25,6 +32,8 @@ export default function ProblemPage() {
     );
     const [answer, setAnswer] = useState("");
     const [showSolution, setShowSolution] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
+    const [recognition, setRecognition] = useState<any>(null);
 
     // estados para problemas
     const [descriptionProblem, setDescriptionProblem] = useState("");
@@ -126,6 +135,107 @@ export default function ProblemPage() {
                 icon: "error",
                 confirmButtonText: "Intentar otra vez",
             });
+        }
+    };
+
+    // Initialize speech recognition
+    useEffect(() => {
+        if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+            // Browser compatibility
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognitionInstance = new SpeechRecognition();
+            
+            recognitionInstance.lang = 'es-ES'; // Set language to Spanish
+            recognitionInstance.continuous = true;
+            recognitionInstance.interimResults = true;
+            
+            recognitionInstance.onresult = (event: { results: string | any[]; }) => {
+                let transcript = '';
+                for (let i = 0; i < event.results.length; i++) {
+                    if (event.results[i].isFinal) {
+                        transcript += event.results[i][0].transcript + ' ';
+                    }
+                }
+                if (transcript) {
+                    setAnswer(transcript.trim());
+                }
+            };
+            
+            recognitionInstance.onerror = (event: { error: any; message?: string }) => {
+                console.error('Error en reconocimiento de voz:', event.error);
+                setIsRecording(false);
+                
+                // Handle different error types
+                let errorMessage = 'Ha ocurrido un error al grabar tu voz. Por favor, intenta de nuevo.';
+                let errorTitle = 'Error de grabación';
+                
+                switch(event.error) {
+                    case 'network':
+                        errorMessage = 'Error de conexión a internet. Verifica tu conexión y vuelve a intentarlo.';
+                        errorTitle = 'Error de red';
+                        break;
+                    case 'not-allowed':
+                    case 'permission-denied':
+                        errorMessage = 'No se ha concedido permiso para usar el micrófono. Por favor, habilita el permiso en tu navegador.';
+                        errorTitle = 'Permiso denegado';
+                        break;
+                    case 'no-speech':
+                        errorMessage = 'No se detectó ninguna voz. Por favor, habla más fuerte o acércate al micrófono.';
+                        errorTitle = 'No se detectó audio';
+                        break;
+                    case 'audio-capture':
+                        errorMessage = 'No se pudo capturar audio. Verifica que tu micrófono esté conectado y funcionando correctamente.';
+                        errorTitle = 'Error de captura de audio';
+                        break;
+                }
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: errorTitle,
+                    text: errorMessage,
+                    showCancelButton: event.error === 'network',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonText: event.error === 'network' ? 'Reintentar' : 'Aceptar',
+                }).then((result) => {
+                    // If user wants to retry after a network error
+                    if (result.isConfirmed && event.error === 'network') {
+                        toggleRecording();
+                    }
+                });
+            };
+            
+            setRecognition(recognitionInstance);
+        }
+    }, []);
+    
+    const toggleRecording = () => {
+        if (!recognition) {
+            Swal.fire({
+                icon: 'error',
+                title: 'No compatible',
+                text: 'Lo sentimos, tu navegador no soporta la grabación de voz.',
+            });
+            return;
+        }
+        
+        if (isRecording) {
+            // Stop recording
+            recognition.stop();
+            setIsRecording(false);
+        } else {
+            // Start recording
+            try {
+                setAnswer(''); // Clear previous answer
+                recognition.start();
+                setIsRecording(true);
+            } catch (error) {
+                console.error('Error starting recognition:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al iniciar grabación',
+                    text: 'No se pudo iniciar la grabación de voz.',
+                });
+            }
         }
     };
 
@@ -255,14 +365,26 @@ export default function ProblemPage() {
                                             <Button
                                                 type="button"
                                                 size="lg"
-                                                className="rounded-full h-16 w-16"
+                                                className={`rounded-full h-16 w-16 ${isRecording ? 'bg-red-500 hover:bg-red-600' : ''}`}
+                                                onClick={toggleRecording}
                                             >
-                                                <Mic className="h-8 w-8" />
+                                                {isRecording ? (
+                                                    <Square className="h-8 w-8" />
+                                                ) : (
+                                                    <Mic className="h-8 w-8" />
+                                                )}
                                             </Button>
                                             <p className="mt-4 text-muted-foreground">
-                                                Haz clic en el micrófono y habla
-                                                para grabar tu respuesta
+                                                {isRecording 
+                                                    ? 'Grabando... Haz clic para detener' 
+                                                    : 'Haz clic en el micrófono para grabar tu respuesta'}
                                             </p>
+                                            {answer && (
+                                                <div className="mt-4 text-left w-full p-3 bg-slate-50 rounded-md">
+                                                    <h4 className="font-medium mb-1">Texto transcrito:</h4>
+                                                    <p>{answer}</p>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
 

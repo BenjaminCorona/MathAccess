@@ -133,19 +133,31 @@ export default function ContentPage() {
             return;
         }
         
-        // Si no hay nada, empezar nueva lectura
+        // Si no hay contenido para leer, salir
         if (!contentRef.current) return;
         
-        // extraer solo texto plano, sin HTML
-        const text = contentRef.current.innerText;
-        if (!text) return;
-
-        // si ya está leyendo algo diferente, cancelamos antes
+        // Si ya está leyendo algo diferente, cancelamos antes
         if (speechSynthesis.speaking) {
             speechSynthesis.cancel();
         }
 
-        const utterance = new SpeechSynthesisUtterance(text);
+        // Construir texto de metadatos
+        let fullText = `Título: ${titleResult || 'No disponible'}. `;
+        fullText += `Curso de Matemáticas. `;
+        fullText += `Tipo: ${typeResult || 'No especificado'}. `;
+        fullText += `Nivel: ${levelResult || 'No especificado'}. `;
+        fullText += `Duración: 45 minutos. `;
+        fullText += `Fecha: ${createdAtResult ? formatDate(createdAtResult) : 'No especificada'}. `;
+        
+        // Agregar una pausa para separar metadatos del contenido
+        fullText += `A continuación, el contenido: `;
+        
+        // Agregar el contenido principal (texto plano, sin HTML)
+        fullText += contentRef.current.innerText;
+        
+        if (!fullText.trim()) return;
+
+        const utterance = new SpeechSynthesisUtterance(fullText);
         utterance.lang = "es-ES";
         utterance.rate = 1;
         utterance.pitch = 1;
@@ -158,6 +170,20 @@ export default function ContentPage() {
         // Iniciar lectura y actualizar estado
         speechSynthesis.speak(utterance);
         setIsSpeaking(true);
+    };
+    
+    // Función auxiliar para formatear fechas de manera más amigable para lectura
+    const formatDate = (dateString: string | number | Date) => {
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        } catch (e) {
+            return dateString;
+        }
     };
 
     return (
